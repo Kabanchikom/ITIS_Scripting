@@ -1,0 +1,36 @@
+RED='\e[31m'
+GREEN='\e[32m'
+RESET='\e[0m'
+
+count=1
+let hit=0
+let miss=0
+
+input=""
+history=( )
+
+echo "Добро пожаловать в игру \"Кто хочет стать экстрасенсом?\""
+echo "Ваша цель - угадать случайное число от 0 до 9. Для выхода введите \"q\""
+echo "Главный приз - ААААААВТОМОБИЛЬ!!!\n"
+while :
+do
+number=${RANDOM: -1}
+read -p "Номер хода: ${total}. Введите число в диапазоне от 0 до 9: " input
+if [[ $input == "q" ]]; then break
+elif (( input < 0 )) || (( input > 9 )) || [[ $input < "0" ]] || [[ $input > "9" ]]; then
+    echo "Ошибка. Введите корректное число."
+elif (( input != number )); then
+    echo "Батюшки! Какая жалость! Правильный ответ: ${number}"
+    history=( "${history[@]}" ${RED}$input${RESET} )
+    miss=$((miss+1))
+else
+    echo "И перед нами победитель! Правильный ответ: ${number}"
+    history=( "${history[@]}" ${GREEN}$input${RESET})
+    hit=$((hit+1))
+fi
+    echo -e "История ходов: ${history[@]}"
+    total=$(( hit + miss ))
+    let hit_percent=hit*100/total
+    let miss_percent=100-hit_percent
+    echo "Верно:${hit_percent}% Неверно:${miss_percent}%"
+done
