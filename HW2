@@ -1,0 +1,37 @@
+#!/usr/bin/bash
+
+# Читаем команду с параметрами
+
+while getopts d:n: flag
+do
+case "${flag}" in
+d) dir_path=${OPTARG};;
+n) name=${OPTARG};;
+esac
+done
+
+# Архивируем содержимое -d
+
+temp="$(mktemp)"
+tar --create --file="$temp" --gzip "$dir_path"
+encoded=$(base64 "$temp")
+rm "$temp"
+
+# Генерируем скрипт самораспаковывающегося архива
+
+rm "$name"
+touch "$name"
+echo "#!/usr/bin/bash" >> "$name"
+echo "extract_path=\"\$(pwd)/\"" >> "$name"
+echo "while getopts o: flag" >> "$name"
+echo "do" >> "$name"
+echo "case \"\${flag}\" in" >> "$name"
+echo "o) extract_path=\${OPTARG};;" >> "$name"
+echo "esac" >> "$name"
+echo "done" >> "$name"
+echo "encoded=\"$encoded\"" >> "$name"
+echo "temp=\"\$(mktemp)\"" >> "$name"
+echo "echo \"\$encoded\" | base64 -d >> \"\$temp\"" >> "$name"
+echo "tar --extract --file=\"\$temp\" --gunzip --directory=\"\$extract_path\"" >> "$name"
+echo "rm \"\$temp\"" >> "$name"
+chmod a+x "$name"
